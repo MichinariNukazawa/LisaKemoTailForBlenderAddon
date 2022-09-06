@@ -10,7 +10,7 @@ LisaKemoTail for Blender Addon
 ![](docs/KemoTailObjectExamples.jpg)]
 
 # Install  
-1. 本アドオンのZIPファイルを[Download](releases/download/v1.0/LisaKemoTailForBlenderAddon.zip)  
+1. 本アドオンのZIPファイルを[Download](https://github.com/MichinariNukazawa/LisaKemoTailForBlenderAddon/releases/download/main/LisaKemoTailForBlenderAddon.zip)  
 2. menuのEdit>Preference から Add-ons を選択  
 3. Installボタンでダウンロードしたファイルを選択  
 4. アドオン一覧に登場した本アドオンにチェックを入れて有効化  
