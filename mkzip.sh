@@ -8,4 +8,6 @@ set -o pipefail
 
 trap 'echo "error:$0($LINENO) \"$BASH_COMMAND\" \"$@\""' ERR
 
-zip LisaKemoTailForBlenderAddon __init__.py
+rm -rf LisaKemoTailForBlenderAddon.zip
+zip LisaKemoTailForBlenderAddon LisaKemoTailForBlenderAddon.py
+
