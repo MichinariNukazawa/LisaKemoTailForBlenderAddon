@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Kemo Tail",
     "author": "michinari.nukazawa@gmail.com",
-    "version": (1, 0),
+    "version": (1, 1),
     "blender": (3, 0, 0),
     "location": "View3D > Add > Mesh > Kemo Tail",
     "description": "Adds a new Mesh Object of Fox Tail (Anime/Manga Like)",
@@ -58,37 +58,48 @@ def add_kemo_tail(
     #bpy.ops.object.name = "Kemo Tail"
     for obj in bpy.context.selected_objects:
         obj.name = "Kemotail"
-        
+
     bpy.ops.object.mode_set(mode="EDIT")
+
+    # make tail root Step1 (and deside mesh Normal)
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":(0, 0, -1)})
+
+    #
+    bpy.ops.mesh.select_all(action='DESELECT')
+    select_by_z_axis(zaxis = 0)
     bpy.ops.mesh.select_nth(nth=2)
     bpy.ops.transform.resize(value=(diameter_scale, diameter_scale, diameter_scale))
 
-    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    select_by_z_axis(zaxis = 0)
     for zaxis in (1.2, 1.8, 2, 2, 1, 1):
         bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":(0, 0, zaxis)})
 
     # 毛並みの点を乱すランダムは大きくしすぎると突き抜けるので固定値。
     # TODO 本当は点の数が増えて密集したら対応して度合いを減らさないとやはり突き抜けるのだが。
-    bpy.ops.object.mode_set(mode="EDIT")
+    # Exclusion Tail root
+    select_by_z_axis(zaxis = -1)
+    bpy.ops.mesh.hide(unselected=False)
     bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.transform.vertex_random(offset=0.05)
+    bpy.ops.mesh.reveal()
 
     rings = [
         {'zaxis' : 0.0, 'resize' : 0.51, 'collapseNum': 2, 'rotate' : -0.0},
         {'zaxis' : 1.2, 'resize' : 0.76, 'collapseNum': 1, 'rotate' : -0.5},
         {'zaxis' : 3.0, 'resize' : 0.89, 'collapseNum': 1, 'rotate' : -0.9},
         {'zaxis' : 5.0, 'resize' : 0.81, 'collapseNum': 1, 'rotate' : -1.2},
-        {'zaxis' : 7.0, 'resize' : 0.61, 'collapseNum': 1, 'rotate' : -0.7},
-        {'zaxis' : 8.0, 'resize' : 0.45, 'collapseNum': 2, 'rotate' : -0.6},
-        {'zaxis' : 9.0, 'resize' : 0.24, 'collapseNum': 3, 'rotate' : -0.4},
+        {'zaxis' : 7.0, 'resize' : 0.56, 'collapseNum': 1, 'rotate' : -0.7},
+        {'zaxis' : 8.0, 'resize' : 0.39, 'collapseNum': 2, 'rotate' : -0.6},
+        {'zaxis' : 9.0, 'resize' : 0.20, 'collapseNum': 3, 'rotate' : -0.4},
     ]
 
     # resize rings
     for ring in rings:
         bpy.ops.mesh.select_all(action='DESELECT')
         select_by_z_axis(zaxis = ring['zaxis'])
-        bpy.ops.transform.resize(
-                value=(ring['resize'], ring['resize'], 1))
+        bpy.ops.transform.resize(value=(ring['resize'], ring['resize'], 1))
 
     # collapse rings
     for index, ring in enumerate(rings):
@@ -107,6 +118,32 @@ def add_kemo_tail(
         bpy.ops.mesh.select_all(action='DESELECT')
         select_by_z_axis(zaxis = ring['zaxis'])
         bpy.ops.transform.rotate(value= (ring['rotate'] * fur_twist_level), orient_axis='Z')
+
+    # make tail tip
+    bpy.ops.mesh.select_all(action='DESELECT')
+    select_by_z_axis(zaxis = 9.0)
+    bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":(0, 0, 1)})
+    bpy.ops.mesh.merge(type='COLLAPSE')
+
+    # make tail root Step2
+    # 真円リングが２本になっているのは、ユーザが編集する際にループカット操作ができるようにしておくため。
+    bpy.ops.mesh.select_all(action='DESELECT')
+    select_by_z_axis(zaxis = 0)
+    bpy.ops.transform.resize(value=(1, 1, 0))
+    #bpy.ops.transform.translate(value=(0, 0, 0.2), orient_axis_ortho='X')
+    #
+    rootringscale = rings[0]['resize'] * 0.7
+    bpy.ops.mesh.select_all(action='DESELECT')
+    select_by_z_axis(zaxis = -1)
+    bpy.ops.transform.resize(value=(rootringscale, rootringscale, 1))
+    # NOTICE: "TRANSFORM_OT_resize" not exist in API show on Console.
+    # https://developer.blender.org/T84148
+    bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":(0, 0, 0)})
+    bpy.ops.transform.resize(value=(0.7, 0.7, 1))
+    bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":(0, 0, 0)})
+    bpy.ops.mesh.merge(type='COLLAPSE')
+    select_by_z_axis(zaxis = -1)
+    bpy.ops.transform.translate(value=(0, 0, 1), orient_axis_ortho='X')
 
     # Modifier SubdivisionSurface
     bpy.ops.object.mode_set(mode="OBJECT")
